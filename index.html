@@ -1,50 +1,50 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>GeoComp Web App</title>
+    <meta charset="UTF-8">
+    <title>GeoComp Measurement App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>GeoComp Measurement App</h1>
-    <div class="container">
-        <button onclick="getCoordinates()">Measure Coordinates</button>
-        <label>N (Latitude): <input type="text" id="latitude" readonly></label>
-        <label>E (Longitude): <input type="text" id="longitude" readonly></label>
-
-        <h2>Foliation</h2>
-        <button onclick="startStrikeMeasurement()">Measure Strike</button>
-        <label>Strike: <input type="text" id="strike" readonly></label>
-        <button onclick="lockStrike()">Lock Strike</button>
-        <button onclick="startDipMeasurement()">Measure Dip</button>
-        <label>Dip: <input type="text" id="dip" readonly></label>
-        <button onclick="lockDip()">Lock Dip</button>
-
-        <h2>Joints</h2>
-        <button onclick="addJoint()">Add Joint</button>
-        <div id="joints"></div>
-
-        <h2>Rock Type</h2>
-        <select id="rockType">
-            <option>Marble</option>
-            <option>Quartzite</option>
-            <option>Bt Gneiss</option>
-            <option>Hb Gneiss</option>
-            <option>Gb Gneiss</option>
-            <option>Charnockite</option>
-            <option>Khondalite</option>
-        </select>
-
-        <h2>Remarks</h2>
-        <textarea id="remarks" rows="4" cols="50"></textarea>
-
-        <button onclick="saveMeasurement()">Save Measurement</button>
-        <button onclick="plotMap()">Plot on Map</button>
-
-        <div id="map" style="height: 400px;"></div>
+    <button onclick="getCoordinates()">Measure Coordinates</button>
+    <div>
+        <label>N (Latitude):</label>
+        <input type="text" id="latitude" readonly>
+        <label>E (Longitude):</label>
+        <input type="text" id="longitude" readonly>
     </div>
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <h2>Foliation</h2>
+    <button onclick="startStrikeMeasurement()">Measure Strike</button>
+    <input type="text" id="strike" readonly>
+    <button onclick="lockStrike()">Lock Strike</button>
+    <button onclick="startDipMeasurement()">Measure Dip</button>
+    <input type="text" id="dip" readonly>
+    <button onclick="lockDip()">Lock Dip</button>
+
+    <h2>Joints</h2>
+    <button onclick="addJoint()">Add Joint</button>
+    <div id="jointsContainer"></div>
+
+    <h2>Rock Type</h2>
+    <select id="rockType">
+        <option>Marble</option>
+        <option>Quartzite</option>
+        <option>Bt Gneiss</option>
+        <option>Hb Gneiss</option>
+        <option>Gb Gneiss</option>
+        <option>Charnockite</option>
+        <option>Khondalite</option>
+    </select>
+
+    <h2>Remarks</h2>
+    <textarea id="remarks" rows="4" cols="50"></textarea>
+
+    <br><br>
+    <button onclick="saveMeasurement()">Save Measurement</button>
+    <button onclick="plotOnMap()">Plot on Map</button>
+
     <script src="script.js"></script>
 </body>
 </html>
