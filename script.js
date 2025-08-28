@@ -1,5 +1,7 @@
 let lockedStrike = null;
 let lockedDip = null;
+let lockedJointStrike = null;
+let lockedJointDip = null;
 let joints = [];
 let measurements = [];
 
@@ -30,6 +32,13 @@ function getCoordinates() {
     }
 }
 
+function formatCompassDirection(angle) {
+    const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    const index = Math.round(angle / 22.5) % 16;
+    return directions[index];
+}
+
 function startStrikeMeasurement() {
     window.addEventListener('deviceorientation', handleStrike, true);
 }
@@ -47,8 +56,7 @@ function lockStrike() {
     window.removeEventListener('deviceorientation', handleStrike, true);
 }
 
-function startDipMeasurement() {
-    window.addEventListener('deviceorientation', handleDip, true);
+deviceorientation', handleDip, true);
 }
 
 function handleDip(event) {
@@ -76,6 +84,7 @@ function handleJointStrike(event) {
 }
 
 function lockJointStrike() {
+    lockedJointStrike = document.getElementById('jointStrike').value;
     window.removeEventListener('deviceorientation', handleJointStrike, true);
 }
 
@@ -91,23 +100,15 @@ function handleJointDip(event) {
 }
 
 function lockJointDip() {
-    const strike = document.getElementById('jointStrike').value;
-    const dip = document.getElementById('jointDip').value;
-    if (strike && dip) {
-        joints.push({ strike: strike, dip: dip });
+    lockedJointDip = document.getElementById('jointDip').value;
+    if (lockedJointStrike && lockedJointDip) {
+        joints.push({ strike: lockedJointStrike, dip: lockedJointDip });
         const container = document.getElementById('jointsContainer');
         const entry = document.createElement('div');
-        entry.textContent = `Strike: ${strike}, Dip: ${dip}`;
+        entry.textContent = `Strike: ${lockedJointStrike}, Dip: ${lockedJointDip}`;
         container.appendChild(entry);
     }
     window.removeEventListener('deviceorientation', handleJointDip, true);
-}
-
-function formatCompassDirection(angle) {
-    const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-    const index = Math.round(angle / 22.5) % 16;
-    return directions[index];
 }
 
 function saveMeasurement() {
@@ -115,7 +116,9 @@ function saveMeasurement() {
         latitude: document.getElementById('latitude').value,
         longitude: document.getElementById('longitude').value,
         strike: lockedStrike,
-               rockType: document.getElementById('rockType').value,
+        dip: lockedDip,
+        joints: joints,
+        rockType: document.getElementById('rockType').value,
         remarks: document.getElementById('remarks').value
     };
     measurements.push(data);
@@ -125,7 +128,8 @@ function saveMeasurement() {
 function viewData() {
     const table = document.getElementById('dataTable');
     table.innerHTML = "<tr><th>Latitude</th><th>Longitude</th><th>Strike</th><th>Dip</th><th>Joints</th><th>Rock Type</th><th>Remarks</th></tr>";
-    = m.joints.map(j => `(${j.strike}, ${j.dip})`).join(", ");
+    measurements.forEach(m => {
+        const jointText = m.joints.map(j => `(${j.strike}, ${j.dip})`).join(", ");
         const row = `<tr><td>${m.latitude}</td><td>${m.longitude}</td><td>${m.strike}</td><td>${m.dip}</td><td>${jointText}</td><td>${m.rockType}</td><td>${m.remarks}</td></tr>`;
         table.innerHTML += row;
     });
