@@ -1,0 +1,15 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+.container {
+    max-width: 600px;
+}
+label, select, textarea, input {
+    display: block;
+    margin: 10px 0;
+}
+button {
+    margin: 5px 0;
+}
