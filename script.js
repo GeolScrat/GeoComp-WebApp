@@ -1,6 +1,7 @@
 let lockedStrike = null;
 let lockedDip = null;
 let joints = [];
+let measurements = [];
 
 function enableSensors() {
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -37,7 +38,7 @@ function handleStrike(event) {
     const alpha = event.alpha;
     if (alpha !== null) {
         const compassDir = formatCompassDirection(alpha);
-        document.getElementById('strike').value = compassDir;
+        document.getElementById('strike').value = compassDir + " (" + Math.round(alpha) + "°)";
     }
 }
 
@@ -54,7 +55,7 @@ function handleDip(event) {
     const beta = event.beta;
     const dipAngle = Math.abs(beta);
     const compassDir = formatCompassDirection(event.alpha);
-    document.getElementById('dip').value = Math.round(dipAngle) + compassDir;
+    document.getElementById('dip').value = Math.round(dipAngle) + "° " + compassDir;
 }
 
 function lockDip() {
@@ -62,16 +63,44 @@ function lockDip() {
     window.removeEventListener('deviceorientation', handleDip, true);
 }
 
-function addJoint() {
-    const jointStrike = prompt("Enter joint strike (e.g., N45E):");
-    const jointDip = prompt("Enter joint dip (e.g., 34SW):");
-    if (jointStrike && jointDip) {
-        joints.push({ strike: jointStrike, dip: jointDip });
+function startJointStrikeMeasurement() {
+    window.addEventListener('deviceorientation', handleJointStrike, true);
+}
+
+function handleJointStrike(event) {
+    const alpha = event.alpha;
+    if (alpha !== null) {
+        const compassDir = formatCompassDirection(alpha);
+        document.getElementById('jointStrike').value = compassDir + " (" + Math.round(alpha) + "°)";
+    }
+}
+
+function lockJointStrike() {
+    window.removeEventListener('deviceorientation', handleJointStrike, true);
+}
+
+function startJointDipMeasurement() {
+    window.addEventListener('deviceorientation', handleJointDip, true);
+}
+
+function handleJointDip(event) {
+    const beta = event.beta;
+    const dipAngle = Math.abs(beta);
+    const compassDir = formatCompassDirection(event.alpha);
+    document.getElementById('jointDip').value = Math.round(dipAngle) + "° " + compassDir;
+}
+
+function lockJointDip() {
+    const strike = document.getElementById('jointStrike').value;
+    const dip = document.getElementById('jointDip').value;
+    if (strike && dip) {
+        joints.push({ strike: strike, dip: dip });
         const container = document.getElementById('jointsContainer');
         const entry = document.createElement('div');
-        entry.textContent = `Strike: ${jointStrike}, Dip: ${jointDip}`;
+        entry.textContent = `Strike: ${strike}, Dip: ${dip}`;
         container.appendChild(entry);
     }
+    window.removeEventListener('deviceorientation', handleJointDip, true);
 }
 
 function formatCompassDirection(angle) {
@@ -86,15 +115,34 @@ function saveMeasurement() {
         latitude: document.getElementById('latitude').value,
         longitude: document.getElementById('longitude').value,
         strike: lockedStrike,
-        dip: lockedDip,
-        joints: joints,
-        rockType: document.getElementById('rockType').value,
+               rockType: document.getElementById('rockType').value,
         remarks: document.getElementById('remarks').value
     };
-    console.log("Saved Measurement:", data);
+    measurements.push(data);
     alert("Measurement saved successfully!");
 }
 
+function viewData() {
+    const table = document.getElementById('dataTable');
+    table.innerHTML = "<tr><th>Latitude</th><th>Longitude</th><th>Strike</th><th>Dip</th><th>Joints</th><th>Rock Type</th><th>Remarks</th></tr>";
+    = m.joints.map(j => `(${j.strike}, ${j.dip})`).join(", ");
+        const row = `<tr><td>${m.latitude}</td><td>${m.longitude}</td><td>${m.strike}</td><td>${m.dip}</td><td>${jointText}</td><td>${m.rockType}</td><td>${m.remarks}</td></tr>`;
+        table.innerHTML += row;
+    });
+}
+
 function plotOnMap() {
-    alert("Map plotting feature coming soon!");
+    const mapDiv = document.getElementById('map');
+    mapDiv.innerHTML = "";
+    const map = L.map('map').setView([7.269541, 80.581070], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © OpenStreetMap contributors'
+    }).addTo(map);
+    measurements.forEach(m => {
+        if (m.latitude && m.longitude) {
+            L.marker([parseFloat(m.latitude), parseFloat(m.longitude)])
+                .addTo(map)
+                .bindPopup(`Strike: ${m.strike}<br>Dip: ${m.dip}<br>Rock: ${m.rockType}`);
+        }
+    });
 }
