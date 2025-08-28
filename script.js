@@ -2,6 +2,22 @@ let lockedStrike = null;
 let lockedDip = null;
 let joints = [];
 
+function enableSensors() {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    alert("Sensors enabled. You can now measure strike and dip.");
+                } else {
+                    alert("Permission denied. Cannot access sensors.");
+                }
+            })
+            .catch(console.error);
+    } else {
+        alert("Sensor permission not required or not supported on this device.");
+    }
+}
+
 function getCoordinates() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
@@ -14,7 +30,7 @@ function getCoordinates() {
 }
 
 function startStrikeMeasurement() {
-    window.addEventListener('deviceorientationabsolute', handleStrike, true);
+    window.addEventListener('deviceorientation', handleStrike, true);
 }
 
 function handleStrike(event) {
@@ -27,7 +43,7 @@ function handleStrike(event) {
 
 function lockStrike() {
     lockedStrike = document.getElementById('strike').value;
-    window.removeEventListener('deviceorientationabsolute', handleStrike, true);
+    window.removeEventListener('deviceorientation', handleStrike, true);
 }
 
 function startDipMeasurement() {
@@ -74,7 +90,8 @@ function saveMeasurement() {
         joints: joints,
         rockType: document.getElementById('rockType').value,
         remarks: document.getElementById('remarks').value
-    data);
+    };
+    console.log("Saved Measurement:", data);
     alert("Measurement saved successfully!");
 }
 
